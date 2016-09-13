@@ -244,7 +244,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			lpszPassWord[nPassLen + 1] = TEXT('\n');
 			lpszPassWord[nPassLen + 2] = TEXT('\0');
 			// 初期シードを設定
-			std::array<int, std::mt19937::state_size> seed_data;
+			std::array<std::seed_seq::result_type, std::mt19937::state_size> seed_data;
 			std::random_device rd;
 			std::generate_n(seed_data.data(), seed_data.size(), std::ref(rd));
 			std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
