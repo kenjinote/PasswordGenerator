@@ -2,15 +2,8 @@
 
 #include <windows.h>
 #include <commctrl.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "mt19937ar.h"
-#ifdef __cplusplus
-}
-#endif
-
+#include <array>
+#include <random>
 #include "sha512.hh"
 
 #define CHECKBOX_STYLE (WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_AUTOCHECKBOX)
@@ -245,20 +238,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					0);
 				break;
 			}
-			LPTSTR lpszPassWord = (LPTSTR)GlobalAlloc(
-				GMEM_FIXED,
+			LPTSTR lpszPassWord = (LPTSTR)GlobalAlloc(GMEM_FIXED,
 				sizeof(TCHAR)*(nPassLen + 3));
 			lpszPassWord[nPassLen] = TEXT('\r');
 			lpszPassWord[nPassLen + 1] = TEXT('\n');
-			lpszPassWord[nPassLen + 1 + 1] = 0;
-			init_genrand((unsigned long)GetTickCount());
-			UINT r;
+			lpszPassWord[nPassLen + 2] = TEXT('\0');
+			// 初期シードを設定
+			std::array<int, std::mt19937::state_size> seed_data;
+			std::random_device rd;
+			std::generate_n(seed_data.data(), seed_data.size(), std::ref(rd));
+			std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+			std::mt19937 engine(seq);
+			// 乱数生成
 			const UINT charlen = lstrlen(szSample);
 			for (int i = 0; i < nPassCount; ++i)
 			{
 				for (int j = 0; j < nPassLen; ++j)
 				{
-					r = genrand_int32();
+					UINT r = engine();
 					auto str = sw::sha512::calculate(&r, sizeof(UINT));
 					r = stoul(str.substr(0, 8), nullptr, 16);
 					r %= charlen;
