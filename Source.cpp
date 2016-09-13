@@ -11,6 +11,8 @@ extern "C" {
 }
 #endif
 
+#include "sha512.hh"
+
 #define CHECKBOX_STYLE (WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_AUTOCHECKBOX)
 
 const TCHAR szClassName[] = TEXT("PASSWORD GENERATOR");
@@ -41,412 +43,155 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		// 文字数
-		CreateWindow(
-			WC_STATIC,
-			TEXT("文字数："),
+		CreateWindow(WC_STATIC, TEXT("文字数："),
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
-			10, 10, 128, 30,
-			hWnd,
-			(HMENU)ID_STATIC1,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindowEx(
-			WS_EX_CLIENTEDGE,
-			WC_EDIT,
-			TEXT("16"),
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER,
-			138, 10, 256, 30,
-			hWnd,
-			(HMENU)ID_EDIT1,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
+			10, 10, 128, 30, hWnd, (HMENU)ID_STATIC1,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT,
+			TEXT("16"), WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER,
+			138, 10, 256, 30, hWnd, (HMENU)ID_EDIT1,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		// 記号
-		CreateWindow(
-			WC_STATIC,
-			TEXT("使用文字："),
+		CreateWindow(WC_STATIC, TEXT("使用文字："),
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
-			10, 50, 128, 30,
-			hWnd,
-			(HMENU)ID_STATIC2,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("大文字"),
-			CHECKBOX_STYLE,
-			138, 50, 90, 30,
-			hWnd,
-			(HMENU)ID_CHECK_UPPER,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("小文字"),
-			CHECKBOX_STYLE,
-			228, 50, 90, 30,
-			hWnd,
-			(HMENU)ID_CHECK_LOWER,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("数字"),
-			CHECKBOX_STYLE,
-			318, 50, 64, 30,
-			hWnd,
-			(HMENU)ID_CHECK_NUMBER,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("!"),
-			CHECKBOX_STYLE,
-			138, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK1,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("\""),
-			CHECKBOX_STYLE,
-			170, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK2,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("#"),
-			CHECKBOX_STYLE,
-			202, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK3,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("$"),
-			CHECKBOX_STYLE,
-			234, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK4,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("%"),
-			CHECKBOX_STYLE,
-			266, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK5,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("&&"),
-			CHECKBOX_STYLE,
-			298, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK6,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("'"),
-			CHECKBOX_STYLE,
-			330, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK7,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("("),
-			CHECKBOX_STYLE,
-			362, 90, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK8,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT(")"),
-			CHECKBOX_STYLE,
-			138, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK9,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("*"),
-			CHECKBOX_STYLE,
-			170, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK10,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("+"),
-			CHECKBOX_STYLE,
-			202, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK11,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT(","),
-			CHECKBOX_STYLE,
-			234, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK12,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("-"),
-			CHECKBOX_STYLE,
-			266, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK13,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("."),
-			CHECKBOX_STYLE,
-			298, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK14,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("/"),
-			CHECKBOX_STYLE,
-			330, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK15,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT(":"),
-			CHECKBOX_STYLE,
-			362, 130, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK16,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT(";"),
-			CHECKBOX_STYLE,
-			138, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK17,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("<"),
-			CHECKBOX_STYLE,
-			170, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK18,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("="),
-			CHECKBOX_STYLE,
-			202, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK19,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT(">"),
-			CHECKBOX_STYLE,
-			234, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK20,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("?"),
-			CHECKBOX_STYLE,
-			266, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK21,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("@"),
-			CHECKBOX_STYLE,
-			298, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK22,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("["),
-			CHECKBOX_STYLE,
-			330, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK23,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("\\"),
-			CHECKBOX_STYLE,
-			362, 170, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK24,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("]"),
-			CHECKBOX_STYLE,
-			138, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK25,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("^"),
-			CHECKBOX_STYLE,
-			170, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK26,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("_"),
-			CHECKBOX_STYLE,
-			202, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK27,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("`"),
-			CHECKBOX_STYLE,
-			234, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK28,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("{"),
-			CHECKBOX_STYLE,
-			266, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK29,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("|"),
-			CHECKBOX_STYLE,
-			298, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK30,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("}"),
-			CHECKBOX_STYLE,
-			330, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK31,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("~"),
-			CHECKBOX_STYLE,
-			362, 210, 32, 30,
-			hWnd,
-			(HMENU)ID_CHECK32,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("記号"),
+			10, 50, 128, 30, hWnd, (HMENU)ID_STATIC2,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("大文字"), CHECKBOX_STYLE,
+			138, 50, 90, 30, hWnd, (HMENU)ID_CHECK_UPPER,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("小文字"), CHECKBOX_STYLE,
+			228, 50, 90, 30, hWnd, (HMENU)ID_CHECK_LOWER,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("数字"), CHECKBOX_STYLE,
+			318, 50, 64, 30, hWnd, (HMENU)ID_CHECK_NUMBER,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("!"), CHECKBOX_STYLE,
+			138, 90, 32, 30, hWnd, (HMENU)ID_CHECK1,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("\""), CHECKBOX_STYLE,
+			170, 90, 32, 30, hWnd, (HMENU)ID_CHECK2,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("#"), CHECKBOX_STYLE,
+			202, 90, 32, 30, hWnd, (HMENU)ID_CHECK3,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("$"), CHECKBOX_STYLE,
+			234, 90, 32, 30, hWnd, (HMENU)ID_CHECK4,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("%"), CHECKBOX_STYLE,
+			266, 90, 32, 30, hWnd, (HMENU)ID_CHECK5,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("&&"), CHECKBOX_STYLE,
+			298, 90, 32, 30, hWnd, (HMENU)ID_CHECK6,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("'"), CHECKBOX_STYLE,
+			330, 90, 32, 30, hWnd, (HMENU)ID_CHECK7,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("("), CHECKBOX_STYLE,
+			362, 90, 32, 30, hWnd, (HMENU)ID_CHECK8,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT(")"), CHECKBOX_STYLE,
+			138, 130, 32, 30, hWnd, (HMENU)ID_CHECK9,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("*"), CHECKBOX_STYLE,
+			170, 130, 32, 30, hWnd, (HMENU)ID_CHECK10,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("+"), CHECKBOX_STYLE,
+			202, 130, 32, 30, hWnd, (HMENU)ID_CHECK11,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT(","), CHECKBOX_STYLE,
+			234, 130, 32, 30, hWnd, (HMENU)ID_CHECK12,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("-"), CHECKBOX_STYLE,
+			266, 130, 32, 30, hWnd, (HMENU)ID_CHECK13,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("."), CHECKBOX_STYLE,
+			298, 130, 32, 30, hWnd, (HMENU)ID_CHECK14,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("/"), CHECKBOX_STYLE,
+			330, 130, 32, 30, hWnd, (HMENU)ID_CHECK15,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT(":"), CHECKBOX_STYLE,
+			362, 130, 32, 30, hWnd, (HMENU)ID_CHECK16,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT(";"), CHECKBOX_STYLE,
+			138, 170, 32, 30, hWnd, (HMENU)ID_CHECK17,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("<"), CHECKBOX_STYLE,
+			170, 170, 32, 30, hWnd, (HMENU)ID_CHECK18,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("="), CHECKBOX_STYLE,
+			202, 170, 32, 30, hWnd, (HMENU)ID_CHECK19,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT(">"), CHECKBOX_STYLE,
+			234, 170, 32, 30, hWnd, (HMENU)ID_CHECK20,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("?"), CHECKBOX_STYLE,
+			266, 170, 32, 30, hWnd, (HMENU)ID_CHECK21,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("@"), CHECKBOX_STYLE,
+			298, 170, 32, 30, hWnd, (HMENU)ID_CHECK22,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("["), CHECKBOX_STYLE,
+			330, 170, 32, 30, hWnd, (HMENU)ID_CHECK23,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("\\"), CHECKBOX_STYLE,
+			362, 170, 32, 30, hWnd, (HMENU)ID_CHECK24,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("]"), CHECKBOX_STYLE,
+			138, 210, 32, 30, hWnd, (HMENU)ID_CHECK25,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("^"), CHECKBOX_STYLE,
+			170, 210, 32, 30, hWnd, (HMENU)ID_CHECK26,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("_"), CHECKBOX_STYLE,
+			202, 210, 32, 30, hWnd, (HMENU)ID_CHECK27,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("`"), CHECKBOX_STYLE,
+			234, 210, 32, 30, hWnd, (HMENU)ID_CHECK28,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("{"), CHECKBOX_STYLE,
+			266, 210, 32, 30, hWnd, (HMENU)ID_CHECK29,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("|"), CHECKBOX_STYLE,
+			298, 210, 32, 30, hWnd, (HMENU)ID_CHECK30,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("}"), CHECKBOX_STYLE,
+			330, 210, 32, 30, hWnd, (HMENU)ID_CHECK31,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("~"), CHECKBOX_STYLE,
+			362, 210, 32, 30, hWnd, (HMENU)ID_CHECK32,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindow(WC_BUTTON, TEXT("記号"),
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTO3STATE,
-			10, 90, 64, 30,
-			hWnd,
-			(HMENU)ID_CHECKALL,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
+			10, 90, 64, 30, hWnd, (HMENU)ID_CHECKALL,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		{
-			for (int nID = ID_CHECK_UPPER; nID <= ID_CHECKALL; nID++)
+			for (int nID = ID_CHECK_UPPER; nID <= ID_CHECKALL; ++nID)
 				CheckDlgButton(hWnd, nID, 1);
 		}
 		// 生成個数
-		CreateWindow(
-			WC_STATIC,
-			TEXT("生成個数："),
+		CreateWindow(WC_STATIC, TEXT("生成個数："),
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
-			10, 250, 128, 30,
-			hWnd,
-			(HMENU)ID_STATIC3,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
-		CreateWindowEx(
-			WS_EX_CLIENTEDGE,
-			WC_EDIT,
-			TEXT("1"),
+			10, 250, 128, 30, hWnd, (HMENU)ID_STATIC3,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
+		CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, TEXT("1"),
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER,
-			138, 250, 256, 30,
-			hWnd,
-			(HMENU)ID_EDIT2,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
+			138, 250, 256, 30, hWnd, (HMENU)ID_EDIT2,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		// 生成ボタン
-		CreateWindow(
-			WC_BUTTON,
-			TEXT("生成"),
+		CreateWindow(WC_BUTTON, TEXT("生成"),
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-			10, 290, 128, 30,
-			hWnd,
-			(HMENU)IDOK,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
+			10, 290, 128, 30, hWnd, (HMENU)IDOK,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		// 生成結果
-		CreateWindowEx(
-			WS_EX_CLIENTEDGE,
-			WC_EDIT,
-			0,
+		CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, 0,
 			WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
 			ES_READONLY | ES_MULTILINE | ES_AUTOHSCROLL,
-			10, 330, 384, 256,
-			hWnd,
-			(HMENU)ID_EDIT3,
-			((LPCREATESTRUCT)lParam)->hInstance,
-			0);
+			10, 330, 384, 256, hWnd, (HMENU)ID_EDIT3,
+			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		SendDlgItemMessage(hWnd, ID_EDIT3, EM_LIMITTEXT, 0, 0);
-		SendDlgItemMessage(
-			hWnd,
-			ID_EDIT3,
-			WM_SETFONT,
-			(WPARAM)(HFONT)GetStockObject(SYSTEM_FIXED_FONT),
-			0);
+		SendDlgItemMessage(hWnd, ID_EDIT3, WM_SETFONT,
+			(WPARAM)(HFONT)GetStockObject(SYSTEM_FIXED_FONT), 0);
 		break;
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
@@ -480,9 +225,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				lstrcat(szSample, TEXT("0123456789"));
 			}
-			TCHAR szTemp[2];
-			szTemp[1] = 0;
-			for (int nID = ID_CHECK1; nID <= ID_CHECK32; nID++)
+			TCHAR szTemp[2] = { 0 };
+			for (int nID = ID_CHECK1; nID <= ID_CHECK32; ++nID)
 			{
 				if (IsDlgButtonChecked(hWnd, nID) == 1)
 				{
@@ -510,19 +254,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			init_genrand((unsigned long)GetTickCount());
 			UINT r;
 			const UINT charlen = lstrlen(szSample);
-			for (int i = 0; i<nPassCount; i++)
+			for (int i = 0; i < nPassCount; ++i)
 			{
-				for (int j = 0; j<nPassLen; j++)
+				for (int j = 0; j < nPassLen; ++j)
 				{
-					r = genrand_int32() % charlen;
+					r = genrand_int32();
+					auto str = sw::sha512::calculate(&r, sizeof(UINT));
+					r = stoul(str.substr(0, 8), nullptr, 16);
+					r %= charlen;
 					lpszPassWord[j] = szSample[r];
 				}
-				SendDlgItemMessage(
-					hWnd,
-					ID_EDIT3,
-					EM_REPLACESEL,
-					0,
-					(LPARAM)lpszPassWord);
+				SendDlgItemMessage(hWnd, ID_EDIT3, EM_REPLACESEL, 0, (LPARAM)lpszPassWord);
 			}
 			GlobalFree(lpszPassWord);
 			SendDlgItemMessage(hWnd, ID_EDIT3, EM_SETSEL, 0, -1);
@@ -533,13 +275,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (BST_INDETERMINATE == SendDlgItemMessage(hWnd, ID_CHECKALL, BM_GETCHECK, 0, 0))
 				SendDlgItemMessage(hWnd, ID_CHECKALL, BM_SETCHECK, BST_UNCHECKED, 0);
 			const BOOL bCheck = IsDlgButtonChecked(hWnd, ID_CHECKALL);
-			for (int nID = ID_CHECK1; nID <= ID_CHECK32; nID++)
+			for (int nID = ID_CHECK1; nID <= ID_CHECK32; ++nID)
 				CheckDlgButton(hWnd, nID, bCheck);
 		}
 		else if (ID_CHECK1 <= LOWORD(wParam) && LOWORD(wParam) <= ID_CHECK32)
 		{
 			BOOL bOnCount = FALSE, bOffCount = FALSE;
-			for (int nID = ID_CHECK1; nID <= ID_CHECK32; nID++)
+			for (int nID = ID_CHECK1; nID <= ID_CHECK32; ++nID)
 			{
 				if (IsDlgButtonChecked(hWnd, nID))
 					bOnCount = TRUE;
