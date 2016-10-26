@@ -5,6 +5,7 @@
 #include <array>
 #include <random>
 #include "sha512.hh"
+#include "resource.h"
 
 #define CHECKBOX_STYLE (WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_AUTOCHECKBOX)
 
@@ -314,8 +315,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPSTR pCmdLine, int 
 		0,
 		DLGWINDOWEXTRA,
 		hInstance,
-		0,
-		LoadCursor(0,IDC_ARROW),
+		LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1)),
+		LoadCursor(0, IDC_ARROW),
 		0,
 		0,
 		szClassName

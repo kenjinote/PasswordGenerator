@@ -1,0 +1,10 @@
+﻿################################################################################
+# この .gitignore ファイルは Microsoft(R) Visual Studio によって自動的に作成されました。
+################################################################################
+
+/Debug
+/.vs/passwordgenerator/v14
+/Release
+/x64/Debug
+/PasswordGenerator.aps
+/passwordgenerator.VC.db
