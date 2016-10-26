@@ -258,8 +258,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					UINT r = engine();
 					auto str = sw::sha512::calculate(&r, sizeof(UINT));
-					r = stoul(str.substr(0, 8), nullptr, 16);
-					r %= charlen;
+					r = stoul(str.substr(0, 8), nullptr, 16) % charlen;
 					lpszPassWord[j] = szSample[r];
 				}
 				SendDlgItemMessage(hWnd, ID_EDIT3, EM_REPLACESEL, 0, (LPARAM)lpszPassWord);
