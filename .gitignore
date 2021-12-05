@@ -9,3 +9,6 @@
 /PasswordGenerator.aps
 /passwordgenerator.VC.db
 /passwordgenerator.VC.VC.opendb
+/.vs
+/installer
+/x64/Release
