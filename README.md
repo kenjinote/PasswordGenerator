@@ -1,8 +1,8 @@
 【ソ フ ト名】  PasswordGenerator  
-【バージョン】  1.0.0  
+【バージョン】  1.0.1  
 【開  発  者】  Copyright (C) kenjinote All Rights Reserved.  
 【ソフト種別】  フリーソフト  
-【連　絡　先】  https://hack.jp/PasswordGenerator/  
+【連　絡　先】  https://hack.jp/139/  
 
 このたびはPasswordGeneratorをダウンロードしていただきありがとうございます。
 以下の内容をご確認下さい。
