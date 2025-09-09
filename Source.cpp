@@ -9,6 +9,8 @@
 
 #define CHECKBOX_STYLE (WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_AUTOCHECKBOX)
 
+static HFONT g_hFontUI = NULL;
+static HFONT g_hFontMono = NULL;
 const TCHAR szClassName[] = TEXT("PASSWORD GENERATOR");
 const TCHAR szChar[] = TEXT("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 
@@ -31,13 +33,90 @@ enum
 	ID_CHECKALL
 };
 
+int Scale(int x, UINT dpi)
+{
+	return MulDiv(x, dpi, 96);
+}
+
+// すべてのコントロールのサイズと位置を現在のDPIに合わせて再設定する関数
+void ResizeControls(HWND hWnd)
+{
+	const UINT dpi = GetDpiForWindow(hWnd);
+
+	// ラムダ式で現在のDPI用のScale関数を定義
+	auto DpiScale = [&](int x) { return Scale(x, dpi); };
+
+	const int nButtonFlags = SWP_NOZORDER | SWP_NOACTIVATE;
+
+	SetWindowPos(GetDlgItem(hWnd, ID_STATIC1), NULL, DpiScale(10), DpiScale(10), DpiScale(128), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_EDIT1), NULL, DpiScale(138), DpiScale(10), DpiScale(256), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_STATIC2), NULL, DpiScale(10), DpiScale(50), DpiScale(128), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_CHECK_UPPER), NULL, DpiScale(138), DpiScale(50), DpiScale(90), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_CHECK_LOWER), NULL, DpiScale(228), DpiScale(50), DpiScale(90), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_CHECK_NUMBER), NULL, DpiScale(318), DpiScale(50), DpiScale(64), DpiScale(30), nButtonFlags);
+
+	SetWindowPos(GetDlgItem(hWnd, ID_CHECKALL), NULL, DpiScale(10), DpiScale(90), DpiScale(64), DpiScale(30), nButtonFlags);
+
+	// 記号チェックボックスのレイアウト
+	for (int i = 0; i < 32; ++i)
+	{
+		int x = 138 + (i % 8) * 32;
+		int y = 90 + (i / 8) * 40;
+		SetWindowPos(GetDlgItem(hWnd, ID_CHECK1 + i), NULL, DpiScale(x), DpiScale(y), DpiScale(32), DpiScale(30), nButtonFlags);
+	}
+
+	SetWindowPos(GetDlgItem(hWnd, ID_STATIC3), NULL, DpiScale(10), DpiScale(250), DpiScale(128), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_EDIT2), NULL, DpiScale(138), DpiScale(250), DpiScale(256), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, IDOK), NULL, DpiScale(10), DpiScale(290), DpiScale(128), DpiScale(30), nButtonFlags);
+	SetWindowPos(GetDlgItem(hWnd, ID_EDIT3), NULL, DpiScale(10), DpiScale(330), DpiScale(384), DpiScale(256), nButtonFlags);
+}
+
+// フォントを生成し、すべての子ウィンドウに適用するコールバック
+BOOL CALLBACK SetChildFont(HWND hwndChild, LPARAM lParam)
+{
+	SendMessage(hwndChild, WM_SETFONT, (WPARAM)lParam, TRUE);
+	return TRUE;
+}
+
+// DPIに応じてフォントを更新し、コントロールに適用する
+void UpdateFonts(HWND hWnd)
+{
+	const UINT dpi = GetDpiForWindow(hWnd);
+
+	// 以前のフォントがあれば破棄
+	if (g_hFontUI) DeleteObject(g_hFontUI);
+	if (g_hFontMono) DeleteObject(g_hFontMono);
+
+	// ポイントサイズから論理サイズを計算 (9ポイントを基準)
+	int fontHeight = -MulDiv(9, dpi, 72);
+
+	// UI用のフォントを生成
+	g_hFontUI = CreateFont(fontHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY, VARIABLE_PITCH | FF_SWISS, TEXT("Segoe UI"));
+
+	// 結果表示用の等幅フォントを生成
+	g_hFontMono = CreateFont(fontHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY, FIXED_PITCH | FF_MODERN, TEXT("Consolas"));
+
+	// すべての子コントロールにUIフォントを適用
+	EnumChildWindows(hWnd, SetChildFont, (LPARAM)g_hFontUI);
+
+	// 結果表示EDITボックスにだけ等幅フォントを適用
+	SendDlgItemMessage(hWnd, ID_EDIT3, WM_SETFONT, (WPARAM)g_hFontMono, TRUE);
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
 	case WM_CREATE:
+	{
+		WCHAR szText[256];
+		LoadString(0, IDS_STRING102, szText, _countof(szText));		
 		// 文字数
-		CreateWindow(WC_STATIC, TEXT("文字数："),
+		CreateWindow(WC_STATIC, szText,
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
 			10, 10, 128, 30, hWnd, (HMENU)ID_STATIC1,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
@@ -46,17 +125,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			138, 10, 256, 30, hWnd, (HMENU)ID_EDIT1,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		// 記号
-		CreateWindow(WC_STATIC, TEXT("使用文字："),
+		LoadString(0, IDS_STRING103, szText, _countof(szText));
+		CreateWindow(WC_STATIC, szText,
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
 			10, 50, 128, 30, hWnd, (HMENU)ID_STATIC2,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
-		CreateWindow(WC_BUTTON, TEXT("大文字"), CHECKBOX_STYLE,
+		LoadString(0, IDS_STRING104, szText, _countof(szText));
+		CreateWindow(WC_BUTTON, szText, CHECKBOX_STYLE,
 			138, 50, 90, 30, hWnd, (HMENU)ID_CHECK_UPPER,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
-		CreateWindow(WC_BUTTON, TEXT("小文字"), CHECKBOX_STYLE,
+		LoadString(0, IDS_STRING105, szText, _countof(szText));
+		CreateWindow(WC_BUTTON, szText, CHECKBOX_STYLE,
 			228, 50, 90, 30, hWnd, (HMENU)ID_CHECK_LOWER,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
-		CreateWindow(WC_BUTTON, TEXT("数字"), CHECKBOX_STYLE,
+		LoadString(0, IDS_STRING106, szText, _countof(szText));
+		CreateWindow(WC_BUTTON, szText, CHECKBOX_STYLE,
 			318, 50, 64, 30, hWnd, (HMENU)ID_CHECK_NUMBER,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		CreateWindow(WC_BUTTON, TEXT("!"), CHECKBOX_STYLE,
@@ -155,7 +238,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		CreateWindow(WC_BUTTON, TEXT("~"), CHECKBOX_STYLE,
 			362, 210, 32, 30, hWnd, (HMENU)ID_CHECK32,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
-		CreateWindow(WC_BUTTON, TEXT("記号"),
+		LoadString(0, IDS_STRING107, szText, _countof(szText));
+		CreateWindow(WC_BUTTON, szText,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTO3STATE,
 			10, 90, 64, 30, hWnd, (HMENU)ID_CHECKALL,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
@@ -164,7 +248,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				CheckDlgButton(hWnd, nID, 1);
 		}
 		// 生成個数
-		CreateWindow(WC_STATIC, TEXT("生成個数："),
+		LoadString(0, IDS_STRING108, szText, _countof(szText));
+		CreateWindow(WC_STATIC, szText,
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
 			10, 250, 128, 30, hWnd, (HMENU)ID_STATIC3,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
@@ -173,7 +258,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			138, 250, 256, 30, hWnd, (HMENU)ID_EDIT2,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
 		// 生成ボタン
-		CreateWindow(WC_BUTTON, TEXT("生成"),
+		LoadString(0, IDS_STRING109, szText, _countof(szText));
+		CreateWindow(WC_BUTTON, szText,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
 			10, 290, 128, 30, hWnd, (HMENU)IDOK,
 			((LPCREATESTRUCT)lParam)->hInstance, 0);
@@ -186,7 +272,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SendDlgItemMessage(hWnd, ID_EDIT3, EM_LIMITTEXT, 0, 0);
 		SendDlgItemMessage(hWnd, ID_EDIT3, WM_SETFONT,
 			(WPARAM)(HFONT)GetStockObject(SYSTEM_FIXED_FONT), 0);
+		UpdateFonts(hWnd);
+		ResizeControls(hWnd);
 		break;
+	}
+	case WM_DPICHANGED:
+	{
+		UpdateFonts(hWnd);
+		RECT* const prcNewWindow = (RECT* const)lParam;
+		SetWindowPos(hWnd,
+			NULL,
+			prcNewWindow->left,
+			prcNewWindow->top,
+			prcNewWindow->right - prcNewWindow->left,
+			prcNewWindow->bottom - prcNewWindow->top,
+			SWP_NOZORDER | SWP_NOACTIVATE);
+		ResizeControls(hWnd);
+		InvalidateRect(hWnd, NULL, FALSE);
+		break;
+	}
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
 		{
@@ -230,11 +334,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			if (lstrlen(szSample) == 0)
 			{
+				WCHAR szText[256];
+				LoadString(0, IDS_STRING110, szText, _countof(szText));
+
 				MessageBox(
 					hWnd,
-					TEXT("パスワードを生成するには、")
-					TEXT("[使用文字]チェックボックスを")
-					TEXT("少なくとも一つは選択する必要があります。"),
+					szText,
 					0,
 					0);
 				break;
@@ -297,6 +402,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		DestroyWindow(hWnd);
 		break;
 	case WM_DESTROY:
+		if (g_hFontUI) DeleteObject(g_hFontUI);
+		if (g_hFontMono) DeleteObject(g_hFontMono);
 		PostQuitMessage(0);
 		break;
 	default:
@@ -305,8 +412,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPSTR pCmdLine, int nCmdShow)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPWSTR pCmdLine, int nCmdShow)
 {
+	//SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_NEUTRAL));
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	MSG msg;
 	const WNDCLASS wndclass = {
 		0,
@@ -321,11 +430,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPSTR pCmdLine, int 
 		szClassName
 	};
 	RegisterClass(&wndclass);
-	RECT rect = { 0,0,404,596 };
-	AdjustWindowRect(&rect, WS_CAPTION | WS_SYSMENU, 0);
+	//RECT rect = { 0,0,404,596 };
+	//AdjustWindowRect(&rect, WS_CAPTION | WS_SYSMENU, 0);
+
+	// 初期DPIを取得してウィンドウサイズを計算
+	UINT dpi = GetDpiForSystem();
+	RECT rect = { 0, 0, Scale(404, dpi), Scale(596, dpi) };
+	AdjustWindowRectExForDpi(&rect, WS_CAPTION | WS_SYSMENU, FALSE, 0, dpi);
+
+	WCHAR szText[256];
+	LoadString(0, IDS_STRING111, szText, _countof(szText));
 	const HWND hWnd = CreateWindow(
 		szClassName,
-		TEXT("パスワード生成"),
+		szText,
 		WS_CAPTION | WS_SYSMENU,
 		CW_USEDEFAULT,
 		0,
